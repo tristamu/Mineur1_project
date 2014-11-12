@@ -3,9 +3,11 @@
 
 #include <QMainWindow>
 #include <QTableWidgetItem>
+#include <QDir>
+#include <QFileDialog>
 #include "bookObject.h"
 #include "database.h"
-#include "filepathdialog.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -25,13 +27,12 @@ private:
     int ligne, colonne;
     BookObject *bookTemp;
     DatabaseManager *targetDatabase;
-    FilePathDialog *fDialog;
     QString curFileName;
     QDir curPath;
 
 
     BookObject * readLineinTable(int);
-
+    void sauvegarder_second(void);
 
 private slots:
     void nouveau();
@@ -42,6 +43,11 @@ private slots:
     void on_pushButton_clicked();
     void on_tableWidget_cellClicked(int row, int column);
     void on_pushButton_2_clicked();
+
+    //11 12
+
+    void setCurFilePath();
+    void openAFilePath();
 
 };
 
