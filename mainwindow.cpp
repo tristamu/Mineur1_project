@@ -2,10 +2,6 @@
 #include "ui_mainwindow.h"
 #include<QDebug>
 #include<iostream>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QTextStream>
-
 QString tableItems[4]={"Author","Title","ISBN","Year"};
 
 
@@ -15,15 +11,17 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-
     ligne = -1; // to add a row in a blank table
     colonne = 0;
     ui->setupUi(this);
     ui->menuBar->show();
     ui->tableWidget->hide();
+    fDialog = new FilePathDialog();
     connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(nouveau()));
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(fermer()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(sauvegarder()));
+    connect(ui->actionSave_as, SIGNAL(triggered()), fDialog, SLOT(open()));
+    connect(fDialog, SIGNAL(accepted()), fDialog, SLOT(startsauvegarder()));
     bookTemp = new BookObject();
     bookTemp->InitialTableAttributes(tableItems,4);
     targetDatabase = new DatabaseManager();
@@ -46,63 +44,6 @@ void MainWindow::fermer(){
     ui->tableWidget->hide();
     ui->tableWidget->showGrid();
 }
-
-void MainWindow::openAFilePath()
-{
-
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Open File"),QString(),
-                       tr("Database files(*.db);;Text files(*.txt);;C++ Files(*.cpp *.h)"));
-    QString text;
-
-    if(fileName.isEmpty())
-    {
-        QFile file(fileName);
-        if(!file.open(QIODevice::ReadOnly))
-        {
-            QMessageBox::critical(this,tr("Error"),tr("Could not open file"));
-            return;
-        }
-
-    }
-    qDebug()<<"okokokokok   "<<fileName;
-    ui->textEdit->setText(fileName);
-
-    //SET CURRENT FILE PATH
-    curFileName=QDir(fileName).dirName();
-    curPath=fileName.left(fileName.length()-curFileName.length());
-
-
-
-}
-
-void MainWindow::setCurFilePath()
-{
-    QString fileName = QFileDialog::getSaveFileName(this,tr("Save File"),QString(),
-                                           tr("Database files(*.db);;Text Files (*.txt);;C++ Files (*.cpp *.h)") );
-    QFile file(fileName);
-    if(!fileName.isEmpty())
-    {
-
-        if(!file.open(QIODevice::WriteOnly))
-        {
-            QMessageBox::critical(this,tr("Error"),tr("Could not write into this file"));
-            return;
-        }
-
-    }
-
-
-
-    qDebug()<<"setCurFilePath okokokokok   "<<fileName;
-    ui->textEdit->setText(fileName);
-
-    //SET CURRENT FILE PATH
-    curFileName=QDir(fileName).dirName();
-    curPath=fileName.left(fileName.length()-curFileName.length());
-    sauvegarder_second();
-
-}
-
 
 
 BookObject * MainWindow:: readLineinTable(int lineNum)
@@ -132,34 +73,11 @@ BookObject * MainWindow:: readLineinTable(int lineNum)
 }
 
 
-void MainWindow::sauvegarder_second(){
-    int count=0;
-    statusBar()->showMessage(tr("Table saving"),2000);
-    qDebug()<<"----curFileName"<<curPath.path();
-    qDebug()<<"---curPath"<<curFileName;
-    targetDatabase->openDB(curPath,curFileName);
-    targetDatabase->createLibraryTable();
-
-
-    for(;count<=ligne;count++)
-    {
-        std::cout<<"coming into the for"<<std::endl;
-        bookTemp=readLineinTable(count);
-        if(bookTemp->id!=-1)
-        {
-            targetDatabase->saveBook(bookTemp);
-        }
-
-    }
-
-}
-
-
-
-
 void MainWindow::sauvegarder(){
     int count=0;
     statusBar()->showMessage(tr("Table saving"),2000);
+    curFileName = fDialog->validFileName;
+    curPath=fDialog->validFileDir;
     qDebug()<<"----curFileName"<<curPath.path();
     qDebug()<<"---curPath"<<curFileName;
     targetDatabase->openDB(curPath,curFileName);
