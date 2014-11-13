@@ -19,15 +19,12 @@ SOURCES += main.cpp\
     persistentAttribute.cpp \
     persistentObject.cpp \
     database.cpp \
-    bookobject.cpp \
-    filepathdialog.cpp
+    bookobject.cpp
 
 HEADERS  += mainwindow.h \
     persistentAttribute.h \
     persistentObject.h \
     database.h \
-    bookobject.h \
-    filepathdialog.h
+    bookobject.h
 
-FORMS    += mainwindow.ui \
-    filepathdialog.ui
+FORMS    += mainwindow.ui
